@@ -1,0 +1,4 @@
+train: ../train_data/train
+val: ../train_data/train
+nc: 3
+names: ['motorbike','licence-plate','car']
