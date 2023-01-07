@@ -2,7 +2,8 @@ import requests
 import json
 import os
 
-def send_data(img_path, action,vehicle_code):
+
+def send_data(img_path, action, vehicle_code):
     files = {
         'file': (img_path, open(img_path, 'rb'), 'image/jpg')
     }
@@ -10,9 +11,9 @@ def send_data(img_path, action,vehicle_code):
         'vehicleCode': vehicle_code
     }
 
-	server_url = 'https://c214-171-241-81-206.ap.ngrok.io/'
+    server_url = 'https://c214-171-241-81-206.ap.ngrok.io/'
     url_api = server_url + '/api/v1/data/' + action
-    res = requests.post(url_api, files = files, data = data)
+    res = requests.post(url_api, files=files, data=data)
     try:
         data = res.json()
         status_code = res.status_code
