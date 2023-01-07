@@ -2,7 +2,7 @@ import argparse
 import time
 from pathlib import Path
 
-from version2 import ocr
+from ocr import ocr
 import cv2
 import torch
 import torch.backends.cudnn as cudnn
@@ -14,7 +14,7 @@ from utils.general import check_img_size, check_requirements, check_imshow, non_
     scale_coords, xyxy2xywh, strip_optimizer, set_logging, increment_path
 from utils.plots import plot_one_box,save_one_box
 from utils.torch_utils import select_device, load_classifier, time_synchronized, TracedModel
-
+from send_data import send_data
 
 
 def detect(save_img=False, opt = {}):
@@ -30,8 +30,6 @@ def detect(save_img=False, opt = {}):
     #         detect()
     source, weights, view_img, save_txt, save_crop, imgsz, trace = opt.source, opt.weights, opt.view_img, opt.save_txt, opt.save_crop, opt.img_size, not opt.no_trace
     save_img = not opt.nosave and not source.endswith('.txt')  # save inference images
-    print(save_img)
-    print('save_img')
     webcam = source.isnumeric() or source.endswith('.txt') or source.lower().startswith(
         ('rtsp://', 'rtmp://', 'http://', 'https://'))
 
@@ -148,8 +146,9 @@ def detect(save_img=False, opt = {}):
                         save_one_box(xyxy, imc, file= file, BGR=True)
 
                         if names[int(cls)] == 'licence-plate':
-                            #print("Right")
-                            print(ocr(f'{file}'))
+                            vehicle_code = ocr(f'{file}')
+                            #  pause because server not available
+                            # send_data(f'{file}', 'in', vehicle_code)
             # Print time (inference + NMS)
             print(f'{s}Done. ({(1E3 * (t2 - t1)):.1f}ms) Inference, ({(1E3 * (t3 - t2)):.1f}ms) NMS')
 
