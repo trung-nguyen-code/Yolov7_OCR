@@ -27,7 +27,7 @@ def detect(save_img=False, opt={}):
     #             strip_optimizer(opt.weights)
     #     else:
     #         detect()
-    source, weights, view_img, save_txt, save_crop, imgsz, trace = opt.source, opt.weights, opt.view_img, opt.save_txt, opt.save_crop, opt.img_size, not opt.no_trace
+    source, weights, view_img, save_txt, save_crop, imgsz, trace, enable_ocr = opt.source, opt.weights, opt.view_img, opt.save_txt, opt.save_crop, opt.img_size, not opt.no_trace, opt.enable_ocr
     save_img = not opt.nosave and not source.endswith(
         '.txt')  # save inference images
     webcam = source.isnumeric() or source.endswith('.txt') or source.lower().startswith(
@@ -155,17 +155,24 @@ def detect(save_img=False, opt={}):
                         plot_one_box(xyxy, im0, label=label,
                                      color=colors[int(cls)], line_thickness=1)
 
+                    crop_image = None
                     if save_crop:
                         file = save_dir / 'crops' / \
                             names[int(cls)] / f'{p.stem}.jpg'
                         print(f"Yeah,{file}")
-                        crop = save_one_box(
+                        crop_image = save_one_box(
                             xyxy, imc, file=file, BGR=True, save=False)  # not save image, only get crop image to OCR
-                        if names[int(cls)] == 'licence-plate':
-                            vehicle_code = ocr(crop)
-                            print(vehicle_code)
-                            #  pause because server not available
-                            # send_data(f'{file}', 'in', vehicle_code)
+
+                        # OCR here
+                    if names[int(cls)] == 'licence-plate' and enable_ocr == True:
+                        if crop_image is None:
+                            file = save_dir / 'crops' / \
+                                names[int(cls)] / f'{p.stem}.jpg'
+                            crop_image = save_one_box(xyxy, imc, file=file,
+                                                      BGR=True, save=False)
+                        vehicle_code = ocr(crop_image)
+                        print(vehicle_code)
+
             # Print time (inference + NMS)
             print(
                 f'{s}Done. ({(1E3 * (t2 - t1)):.1f}ms) Inference, ({(1E3 * (t3 - t2)):.1f}ms) NMS')
@@ -227,7 +234,7 @@ def detect_export(path):
     parser.add_argument('--save-crop', action='store_true',
                         default=True, help='save crop prediction box')
     parser.add_argument('--nosave', action='store_true',
-                        help='do not save images/videos')
+                        help='do not save images/videos', default=True)
     parser.add_argument('--classes', nargs='+', type=int, default=[1],
                         help='filter by class: --class 0, or --class 0 1 2')
     parser.add_argument('--agnostic-nms', action='store_true',
@@ -244,6 +251,8 @@ def detect_export(path):
                         help='existing project/name ok, do not increment')
     parser.add_argument('--no-trace', action='store_true',
                         help='don`t trace model')
+    parser.add_argument('--enable-ocr', action='store_true',
+                        help='Enable ocr', default=True)
     opt = parser.parse_args()
     print(opt)
     with torch.no_grad():
@@ -288,5 +297,6 @@ def detect_export(path):
 #         else:
 #             detect()
 if __name__ == '__main__':
-    path_yolo = 'D:/Work/Yolov7_OCR/images/xe.jpg'
+    path_yolo = 'D:/Work/Yolov7_OCR/videos/xe.mp4'
+    # path_yolo = 'D:/Work/Yolov7_OCR/images/xe.jpg'
     detect_export(path_yolo)
