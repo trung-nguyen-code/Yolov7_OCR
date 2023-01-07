@@ -2,15 +2,12 @@ import easyocr
 import cv2
 
 
-def ocr(IMAGE_PATH):
-    img = cv2.imread(IMAGE_PATH)
-    #img = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+def ocr(img):
     spacer = 100
 
     reader = easyocr.Reader(['en'])
     # Preprocessing image
     img = cv2.bilateralFilter(img, 9, 75, 75)
-    #thread, img = cv2.threshold(img, 50, 255, cv2.THRESH_BINARY)
 
     text = None
     result = reader.readtext(img)
