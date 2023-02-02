@@ -15,6 +15,7 @@ from utils.general import check_img_size, check_requirements, check_imshow, non_
 from utils.plots import plot_one_box, save_one_box
 from utils.torch_utils import select_device, load_classifier, time_synchronized, TracedModel
 from send_data import send_data
+from send_data import check_vehicle_code_format
 
 
 def detect(save_img=False, opt={}):
@@ -161,7 +162,7 @@ def detect(save_img=False, opt={}):
                             names[int(cls)] / f'{p.stem}.jpg'
                         print(f"Yeah,{file}")
                         crop_image = save_one_box(
-                            xyxy, imc, file=file, BGR=True, save=False)  # not save image, only get crop image to OCR
+                            xyxy, imc, file=file, BGR=True, save=True)  # not save image, only get crop image to OCR
 
                         # OCR here
                     if names[int(cls)] == 'licence-plate' and enable_ocr == True:
@@ -169,8 +170,14 @@ def detect(save_img=False, opt={}):
                             file = save_dir / 'crops' / \
                                 names[int(cls)] / f'{p.stem}.jpg'
                             crop_image = save_one_box(xyxy, imc, file=file,
-                                                      BGR=True, save=False)
+                                                      BGR=True, save=True)
                         vehicle_code = ocr(crop_image)
+                        # Check vehicle code format before send data to server here
+                        # if check_vehicle_code_format(vehicle_code):
+                        #     # send_data(file, 'in', vehicle_code)
+                        #     pass
+                        send_data(file, 'in', vehicle_code)
+                        # print(crop_image)
                         print(vehicle_code)
 
             # Print time (inference + NMS)
@@ -211,11 +218,11 @@ def detect(save_img=False, opt={}):
     print(f'Done. ({time.time() - t0:.3f}s)')
 
 
-def detect_export(path):
+def detect_export():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--weights', nargs='+', type=str, default='runs/train/exp/weights/best-tiny.pt',
+    parser.add_argument('--weights', nargs='+', type=str,  default='runs/train/exp/weights/best-tiny.pt',
                         help='model.pt path(s)')
-    parser.add_argument('--source', type=str, default=path,
+    parser.add_argument('--source', type=str,
                         help='source')  # file/folder, 0 for webcam
     parser.add_argument('--img-size', type=int, default=640,
                         help='inference size (pixels)')
@@ -264,39 +271,6 @@ def detect_export(path):
             detect(False, opt)
 
 
-# if __name__ == '__main__':
-#     parser = argparse.ArgumentParser()
-#     parser.add_argument('--weights', nargs='+', type=str, default='runs/train/exp/weights/best.pt', help='model.pt path(s)')
-#     parser.add_argument('--source', type=str, default='inference/images/', help='source')  # file/folder, 0 for webcam
-#     parser.add_argument('--img-size', type=int, default=640, help='inference size (pixels)')
-#     parser.add_argument('--conf-thres', type=float, default=0.25, help='object confidence threshold')
-#     parser.add_argument('--iou-thres', type=float, default=0.45, help='IOU threshold for NMS')
-#     parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
-#     parser.add_argument('--view-img', action='store_true', help='display results')
-#     parser.add_argument('--save-txt', action='store_true', help='save results to *.txt')
-#     parser.add_argument('--save-conf', action='store_true', help='save confidences in --save-txt labels')
-#     parser.add_argument('--save-crop',action='store_true',default=True,help='save crop prediction box')
-#     parser.add_argument('--nosave', action='store_true', help='do not save images/videos')
-#     parser.add_argument('--classes', nargs='+', type=int,default=[0,1,2],help='filter by class: --class 0, or --class 0 1 2')
-#     parser.add_argument('--agnostic-nms', action='store_true', help='class-agnostic NMS')
-#     parser.add_argument('--augment', action='store_true', help='augmented inference')
-#     parser.add_argument('--update', action='store_true', help='update all models')
-#     parser.add_argument('--project', default='runs/detect', help='save results to project/name')
-#     parser.add_argument('--name', default='exp', help='save results to project/name')
-#     parser.add_argument('--exist-ok', action='store_true', help='existing project/name ok, do not increment')
-#     parser.add_argument('--no-trace', action='store_true', help='don`t trace model')
-#     opt = parser.parse_args()
-#     print(opt)
-#     #check_requirements(exclude=('pycocotools', 'thop'))
-#
-#     with torch.no_grad():
-#         if opt.update:  # update all models (to fix SourceChangeWarning)
-#             for opt.weights in ['yolov7.pt']:
-#                 detect()
-#                 strip_optimizer(opt.weights)
-#         else:
-#             detect()
 if __name__ == '__main__':
     path_yolo = 'D:/Work/Yolov7_OCR/videos/xe.mp4'
-    # path_yolo = 'D:/Work/Yolov7_OCR/images/xe.jpg'
-    detect_export(path_yolo)
+    detect_export()
