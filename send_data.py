@@ -11,7 +11,7 @@ def send_data(img_path, action, vehicle_code):
         'vehicleCode': vehicle_code
     }
 
-    server_url = 'http://35.240.201.34/'
+    server_url = 'http://35.240.201.34'
     url_api = server_url + '/api/v1/data/' + action
     res = requests.post(url_api, files=files, data=data)
     try:
