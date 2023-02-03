@@ -6,9 +6,6 @@ import imutils
 
 
 def ocr(img):
-    # root = './'
-    # path = os.path.join(root, path)
-    # image = cv2.imread(path)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     # threshold the image using Otsu's thresholding method
     thresh = cv2.threshold(gray, 0, 255,
@@ -67,9 +64,3 @@ def ocr(img):
     for detection in result:
         text = detection[1]
     return text
-
-
-# if __name__ == '__main__':
-#     root = './'
-#     path = os.path.join(root, 'runs/detect/exp12/crops/licence-plate/0.jpg')
-#     print(ocr(path))

@@ -4,8 +4,10 @@ import os
 
 
 def send_data(img_path, action, vehicle_code):
+    root = './'
+    path = os.path.join(root, img_path)
     files = {
-        'file': (img_path, open(img_path, 'rb'), 'image/jpg')
+        'file': (path, open(path, 'rb'), 'image/jpg')
     }
     data = {
         'vehicleCode': vehicle_code
@@ -21,5 +23,11 @@ def send_data(img_path, action, vehicle_code):
     except requests.exceptions.RequestException:
         print('response text:', res.text)
 
-def check_vehicle_code_format(vehicle_code):
-    pass
+
+def check_vehicle_code_format(vehicle_code: str):
+    vehicle_code = vehicle_code.replace(
+        '-', '').replace('.', '').rstrip().lstrip().strip()
+    vehicle_len = len(vehicle_code)
+    if vehicle_len == 8 or vehicle_len == 9:
+        return True
+    return False

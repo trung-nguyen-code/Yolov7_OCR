@@ -162,22 +162,20 @@ def detect(save_img=False, opt={}):
                             names[int(cls)] / f'{p.stem}.jpg'
                         # print(f"Yeah,{file}")
                         crop_image = save_one_box(
-                            xyxy, imc, file=file, BGR=True, save=False)  # not save image, only get crop image to OCR
+                            xyxy, imc, file=file, BGR=True, save=True)  # not save image, only get crop image to OCR
 
-                        # OCR here
+                    # OCR here
                     if names[int(cls)] == 'licence-plate' and enable_ocr == True:
                         if crop_image is None:
                             file = save_dir / 'crops' / \
                                 names[int(cls)] / f'{p.stem}.jpg'
                             crop_image = save_one_box(xyxy, imc, file=file,
-                                                      BGR=True, save=False)
+                                                      BGR=True, save=True)
                         vehicle_code = ocr(crop_image)
                         # Check vehicle code format before send data to server here
-                        # if check_vehicle_code_format(vehicle_code):
-                        #     # send_data(file, 'in', vehicle_code)
-                        #     pass
-                        # send_data(file, 'in', vehicle_code)
-                        # print(crop_image)
+                        if check_vehicle_code_format(vehicle_code):
+                            send_data(file, 'in', vehicle_code)
+                            pass
                         print(vehicle_code)
 
             # Print time (inference + NMS)
