@@ -25,6 +25,8 @@ def send_data(img_path, action, vehicle_code):
 
 
 def check_vehicle_code_format(vehicle_code: str):
+    if vehicle_code is None:
+        return False
     vehicle_code = vehicle_code.replace(
         '-', '').replace('.', '').rstrip().lstrip().strip()
     vehicle_len = len(vehicle_code)
