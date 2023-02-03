@@ -160,9 +160,9 @@ def detect(save_img=False, opt={}):
                     if save_crop:
                         file = save_dir / 'crops' / \
                             names[int(cls)] / f'{p.stem}.jpg'
-                        print(f"Yeah,{file}")
+                        # print(f"Yeah,{file}")
                         crop_image = save_one_box(
-                            xyxy, imc, file=file, BGR=True, save=True)  # not save image, only get crop image to OCR
+                            xyxy, imc, file=file, BGR=True, save=False)  # not save image, only get crop image to OCR
 
                         # OCR here
                     if names[int(cls)] == 'licence-plate' and enable_ocr == True:
@@ -170,19 +170,19 @@ def detect(save_img=False, opt={}):
                             file = save_dir / 'crops' / \
                                 names[int(cls)] / f'{p.stem}.jpg'
                             crop_image = save_one_box(xyxy, imc, file=file,
-                                                      BGR=True, save=True)
+                                                      BGR=True, save=False)
                         vehicle_code = ocr(crop_image)
                         # Check vehicle code format before send data to server here
                         # if check_vehicle_code_format(vehicle_code):
                         #     # send_data(file, 'in', vehicle_code)
                         #     pass
-                        send_data(file, 'in', vehicle_code)
+                        # send_data(file, 'in', vehicle_code)
                         # print(crop_image)
                         print(vehicle_code)
 
             # Print time (inference + NMS)
-            print(
-                f'{s}Done. ({(1E3 * (t2 - t1)):.1f}ms) Inference, ({(1E3 * (t3 - t2)):.1f}ms) NMS')
+            # print(
+            #     f'{s}Done. ({(1E3 * (t2 - t1)):.1f}ms) Inference, ({(1E3 * (t3 - t2)):.1f}ms) NMS')
 
             # Stream results
             if view_img:
