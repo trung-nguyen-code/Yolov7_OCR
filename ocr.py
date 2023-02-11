@@ -3,25 +3,34 @@ import easyocr
 import os
 import numpy as np
 import imutils
+import pytesseract
+
+pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 
 def ocr(img):
+    # img = cv2.imread(path)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    # cv2.imshow ('gray',gray)
     # threshold the image using Otsu's thresholding method
     thresh = cv2.threshold(gray, 0, 255,
                            cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
 
-    # apply a distance transform which calculates the distance to the
-    # closest zero pixel for each pixel in the input image
-    dist = cv2.distanceTransform(thresh, cv2.DIST_L2, 5)
-    # normalize the distance transform such that the distances lie in
-    # the range [0, 1] and then convert the distance transform back to
-    # an unsigned 8-bit integer in the range [0, 255]
-    dist = cv2.normalize(dist, dist, 0, 1.0, cv2.NORM_MINMAX)
-    dist = (dist * 255).astype("uint8")
-    # threshold the distance transform using Otsu's method
+    # # apply a distance transform which calculates the distance to the
+    # # closest zero pixel for each pixel in the input image
+    # dist = cv2.distanceTransform(thresh, cv2.DIST_L2, 3)
+    # # normalize the distance transform such that the distances lie in
+    # # the range [0, 1] and then convert the distance transform back to
+    # # an unsigned 8-bit integer in the range [0, 255]
+    dist = cv2.normalize(thresh, None, 0, 1.0, cv2.NORM_MINMAX)
+    # cv2.imshow('dist2',dist)
+    # dist = (dist * 255).astype("uint8")
+    # cv2.imshow('dist3',dist)
+    # # threshold the distance transform using Otsu's method
     dist = cv2.threshold(dist, 0, 255,
                          cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
+
+    # cv2.imshow('dist4',dist)
 
     # apply an "opening" morphological operation to disconnect components
     # in the image
@@ -50,7 +59,7 @@ def ocr(img):
     # the image, and then enlarge it via a dilation
     mask = np.zeros(img.shape[:2], dtype="uint8")
     cv2.drawContours(mask, [hull], -1, 255, -1)
-    mask = cv2.dilate(mask, None, iterations=2)
+    mask = cv2.dilate(mask, None, iterations=5)
     # take the bitwise of the opening image and the mask to reveal *just*
     # the characters in the image
     final = cv2.bitwise_and(opening, opening, mask=mask)
@@ -58,9 +67,20 @@ def ocr(img):
     # cv2.imshow("final", final)
     # cv2.waitKey()
 
-    reader = easyocr.Reader(['en'])
-    text = None
-    result = reader.readtext(final)
-    for detection in result:
-        text = detection[1]
+    # reader = easyocr.Reader(['en'])
+    # text = None
+    # result = reader.readtext(final)
+    # for detection in result:
+    #     text = detection[1]
+
+    # OCR the input image using Tesseract
+
+    text = pytesseract.image_to_string(final, config='--psm 6')
+
     return text
+
+
+# if __name__ == '__main__':
+#     root = './'
+#     path = os.path.join(root, 'runs/detect/exp6/crops/licence-plate/08.jpg')
+#     print(ocr(path))

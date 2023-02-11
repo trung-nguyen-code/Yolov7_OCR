@@ -156,27 +156,29 @@ def detect(save_img=False, opt={}):
                         plot_one_box(xyxy, im0, label=label,
                                      color=colors[int(cls)], line_thickness=1)
 
-                    crop_image = None
                     if save_crop:
                         file = save_dir / 'crops' / \
                             names[int(cls)] / f'{p.stem}.jpg'
-                        # print(f"Yeah,{file}")
-                        crop_image = save_one_box(
-                            xyxy, imc, file=file, BGR=True, save=True)  # not save image, only get crop image to OCR
+                        result = save_one_box(
+                            xyxy, imc, file=file, BGR=True, save=True)
+                        if names[int(cls)] == 'licence-plate':
+                            send_data(result[1], 'in')
+
 
                     # OCR here
-                    if names[int(cls)] == 'licence-plate' and enable_ocr == True:
-                        if crop_image is None:
-                            file = save_dir / 'crops' / \
-                                names[int(cls)] / f'{p.stem}.jpg'
-                            crop_image = save_one_box(xyxy, imc, file=file,
-                                                      BGR=True, save=True)
-                        vehicle_code = ocr(crop_image)
-                        # Check vehicle code format before send data to server here
-                        if check_vehicle_code_format(vehicle_code):
-                            send_data(file, 'in', vehicle_code)
-                            pass
-                        print(vehicle_code)
+                    # if names[int(cls)] == 'licence-plate' and enable_ocr == True:
+                    #     if crop_image is None:
+                            # file = save_dir / 'crops' / \
+                            #     names[int(cls)] / f'{p.stem}.jpg'
+                    #         crop_image = save_one_box(xyxy, imc, file=file,
+                    #                                   BGR=True, save=True)
+                    #     vehicle_code = ocr(crop_image)
+                    #     # Check vehicle code format before send data to server here
+                    #     if check_vehicle_code_format(vehicle_code):
+                    #         send_data(file, 'in', vehicle_code)
+                    #         pass
+                    #     print(vehicle_code)
+
 
             # Print time (inference + NMS)
             # print(
@@ -227,7 +229,7 @@ def detect_export():
     parser.add_argument('--conf-thres', type=float,
                         default=0.25, help='object confidence threshold')
     parser.add_argument('--iou-thres', type=float,
-                        default=0.45, help='IOU threshold for NMS')
+                        default=0.7, help='IOU threshold for NMS')
     parser.add_argument('--device', default='',
                         help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     parser.add_argument('--view-img', action='store_true',
